@@ -15,6 +15,7 @@ export default function TaskCard({ task, onEdit, currentUserId }: TaskCardProps)
   const deleteTask = useDeleteTask()
 
   const isOwner = task.owner.id === currentUserId
+  const isAssignee = task.assignee?.id === currentUserId
   const isComplete = task.status === 'DONE'
 
   const toggleComplete = () => {

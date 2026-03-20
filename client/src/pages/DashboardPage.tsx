@@ -34,12 +34,17 @@ export default function DashboardPage() {
   useSocket(dbUserId)
 
   useEffect(() => {
-    const attachToken = async () => {
-      const token = await getToken()
-      setAuthToken(token)
-    }
-    attachToken()
-  }, [getToken])
+  const attachToken = async () => {
+    // force fresh token every time
+    const token = await getToken({ skipCache: true })
+    setAuthToken(token)
+  }
+  attachToken()
+
+  // refresh token every 50 seconds
+  const interval = setInterval(attachToken, 50000)
+  return () => clearInterval(interval)
+}, [getToken])
 
   const filteredTasks = tasks?.filter(t =>
     filter === 'ALL' ? true : t.status === filter

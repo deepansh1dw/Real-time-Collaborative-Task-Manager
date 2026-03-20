@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
-import { clerkClient, verifyToken } from '@clerk/express'
+import { verifyToken } from '@clerk/backend'
 
 export interface AuthRequest extends Request {
   userId?: string
-  userEmail?: string
 }
 
 export async function requireAuth(
@@ -23,11 +22,13 @@ export async function requireAuth(
 
     const payload = await verifyToken(token, {
       secretKey: process.env.CLERK_SECRET_KEY!,
+      clockSkewInMs: 60000, // tolerate 60 seconds clock difference
     })
 
     req.userId = payload.sub
     next()
   } catch (err) {
+    console.error('Auth error:', err)
     res.status(401).json({ error: 'Unauthorized — invalid token' })
   }
 }

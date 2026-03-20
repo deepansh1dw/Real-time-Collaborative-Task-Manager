@@ -92,8 +92,38 @@ export async function updateTask(req: AuthRequest, res: Response) {
 
   const task = await prisma.task.findUnique({ where: { id } })
   if (!task) throw new AppError(404, 'Task not found')
-  if (task.ownerId !== user.id) throw new AppError(403, 'Not authorized')
 
+  // Owner can edit everything
+  // Assignee can only update status
+  const isOwner = task.ownerId === user.id
+  const isAssignee = task.assigneeId === user.id
+
+  if (!isOwner && !isAssignee) {
+    throw new AppError(403, 'Not authorized to update this task')
+  }
+
+  // Assignee can only change status — not title, description, dueDate
+  if (!isOwner && isAssignee) {
+    if (!status) throw new AppError(400, 'Assignees can only update task status')
+
+    const updated = await prisma.task.update({
+      where: { id },
+      data: { status },
+      include: {
+        owner: { select: { id: true, name: true, email: true, avatarUrl: true } },
+        assignee: { select: { id: true, name: true, email: true, avatarUrl: true } },
+      },
+    })
+
+    // Notify both owner and assignee in real-time
+    getIO().to(task.ownerId).emit('task:updated', updated)
+    getIO().to(user.id).emit('task:updated', updated)
+
+    res.json(updated)
+    return
+  }
+
+  // Owner can update everything
   const updated = await prisma.task.update({
     where: { id },
     data: {
@@ -108,7 +138,7 @@ export async function updateTask(req: AuthRequest, res: Response) {
     },
   })
 
-  // Real-time: notify all involved parties
+  // Notify both in real-time
   getIO().to(user.id).emit('task:updated', updated)
   if (updated.assigneeId) {
     getIO().to(updated.assigneeId).emit('task:updated', updated)
