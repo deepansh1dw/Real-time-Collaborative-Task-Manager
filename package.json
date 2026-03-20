@@ -1,0 +1,9 @@
+{
+  "name": "collaborative-task-manager",
+  "version": "1.0.0",
+  "workspaces": ["client", "server"],
+  "scripts": {
+    "client": "npm run dev --workspace=client",
+    "server": "npm run dev --workspace=server"
+  }
+}
