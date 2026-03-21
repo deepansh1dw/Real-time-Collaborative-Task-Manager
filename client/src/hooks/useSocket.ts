@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { getSocket } from '../lib/socket'
-import type { Task } from '../types'
+
 
 export function useSocket(userId: string | undefined) {
   const queryClient = useQueryClient()
