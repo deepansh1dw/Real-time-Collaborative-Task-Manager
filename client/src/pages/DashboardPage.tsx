@@ -3,13 +3,14 @@ import { useAuth, useUser } from '@clerk/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Plus, LogOut, CheckSquare } from 'lucide-react'
 import { setAuthToken } from '../lib/api'
-import { useTasks, useCreateTask, useUpdateTask } from '../hooks/useTasks'
+import { useTasks, useCreateTask, useUpdateTask, useCurrentUser } from '../hooks/useTasks'
 import { useSocket } from '../hooks/useSocket'
 import type { Task, TaskStatus } from '../types'
 import TaskCard from '../components/tasks/TaskCard'
 import TaskForm from '../components/tasks/TaskForm'
 import TaskSkeleton from '../components/skeletons/TaskSkeletons'
 import Modal from '../components/ui/Modal'
+import { useQueryClient } from '@tanstack/react-query'
 
 
 const FILTERS: { label: string; value: TaskStatus | 'ALL' }[] = [
@@ -28,23 +29,34 @@ export default function DashboardPage() {
   const [editingTask, setEditingTask] = useState<Task | null>(null)
 
   const { data: tasks, isLoading } = useTasks()
+
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
-
+  const queryClient = useQueryClient()
+  const { data: currentUser, isLoading: userLoading } = useCurrentUser()
+  console.log('currentUser:', currentUser)
+  console.log('userLoading:', userLoading)
+  console.log('tasks:', tasks)
   useSocket(dbUserId)
 
   useEffect(() => {
-  const attachToken = async () => {
-    // force fresh token every time
-    const token = await getToken({ skipCache: true })
-    setAuthToken(token)
-  }
-  attachToken()
+    const attachToken = async () => {
+      const token = await getToken({ skipCache: true })
+      setAuthToken(token)
+      setTokenReady(true)
+      // Force refetch after token is attached
+      queryClient.invalidateQueries({ queryKey: ['me'] })
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+    }
+    attachToken()
 
-  // refresh token every 50 seconds
-  const interval = setInterval(attachToken, 50000)
-  return () => clearInterval(interval)
-}, [getToken])
+    const interval = setInterval(async () => {
+      const token = await getToken({ skipCache: true })
+      setAuthToken(token)
+    }, 50000)
+
+    return () => clearInterval(interval)
+  }, [getToken, queryClient])
 
   const filteredTasks = tasks?.filter(t =>
     filter === 'ALL' ? true : t.status === filter
@@ -171,7 +183,7 @@ export default function DashboardPage() {
                   key={task.id}
                   task={task}
                   onEdit={setEditingTask}
-                  currentUserId={task.owner.id}
+                  currentUserId={currentUser?.id ?? ''}  // ← CORRECT
                 />
               ))}
             </AnimatePresence>

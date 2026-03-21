@@ -1,18 +1,28 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { taskApi } from '../lib/api'
+import { taskApi, userApi } from '../lib/api'
 import type { CreateTaskInput, UpdateTaskInput } from '../types'
 import toast from 'react-hot-toast'
 
-export function useTasks() {
+export function useTasks(enabled = true) {
   return useQuery({
     queryKey: ['tasks'],
     queryFn: taskApi.getAll,
+    enabled,
+    retry: false,
+  })
+}
+
+export function useCurrentUser(enabled = true) {
+  return useQuery({
+    queryKey: ['me'],
+    queryFn: userApi.getMe,
+    enabled,
+    //retry: false,
   })
 }
 
 export function useCreateTask() {
   const queryClient = useQueryClient()
-
   return useMutation({
     mutationFn: (data: CreateTaskInput) => taskApi.create(data),
     onSuccess: (newTask) => {
@@ -31,7 +41,6 @@ export function useCreateTask() {
 
 export function useUpdateTask() {
   const queryClient = useQueryClient()
-
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateTaskInput }) =>
       taskApi.update(id, data),
@@ -47,7 +56,6 @@ export function useUpdateTask() {
 
 export function useDeleteTask() {
   const queryClient = useQueryClient()
-
   return useMutation({
     mutationFn: (id: string) => taskApi.delete(id),
     onSuccess: () => {
