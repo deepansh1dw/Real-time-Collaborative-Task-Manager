@@ -15,15 +15,15 @@ export function useSocket(userId: string | undefined) {
     socket.emit('join', userId)
 
     // Listen for real-time events
-    socket.on('task:assigned', (task: Task) => {
+    socket.on('task:assigned', () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
     })
 
-    socket.on('task:updated', (task: Task) => {
+    socket.on('task:updated', () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
     })
 
-    socket.on('task:deleted', ({ id }: { id: string }) => {
+    socket.on('task:deleted', () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
     })
 

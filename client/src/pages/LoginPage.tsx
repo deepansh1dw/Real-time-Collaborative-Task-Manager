@@ -52,7 +52,7 @@ export default function LoginPage() {
               dividerText: 'text-slate-500',
             },
           }}
-          redirectUrl="/dashboard"
+          fallbackRedirectUrl="/dashboard"
         />
       </motion.div>
     </div>

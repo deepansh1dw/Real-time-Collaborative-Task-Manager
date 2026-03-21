@@ -23,7 +23,6 @@ const FILTERS: { label: string; value: TaskStatus | 'ALL' }[] = [
 export default function DashboardPage() {
   const { getToken, signOut } = useAuth()
   const { user } = useUser()
-  const [dbUserId, setDbUserId] = useState<string | undefined>()
   const [filter, setFilter] = useState<TaskStatus | 'ALL'>('ALL')
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
@@ -37,7 +36,7 @@ export default function DashboardPage() {
   console.log('currentUser:', currentUser)
   console.log('userLoading:', userLoading)
   console.log('tasks:', tasks)
-  useSocket(dbUserId)
+  useSocket(currentUser?.id)
 
   useEffect(() => {
     const attachToken = async () => {
