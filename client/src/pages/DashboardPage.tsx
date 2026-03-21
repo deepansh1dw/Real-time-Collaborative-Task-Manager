@@ -5,7 +5,7 @@ import { Plus, LogOut, CheckSquare } from 'lucide-react'
 import { setAuthToken } from '../lib/api'
 import { useTasks, useCreateTask, useUpdateTask, useCurrentUser } from '../hooks/useTasks'
 import { useSocket } from '../hooks/useSocket'
-import type { Task, TaskStatus } from '../types'
+import type { TaskStatus } from '../types'
 import TaskCard from '../components/tasks/TaskCard'
 import TaskForm from '../components/tasks/TaskForm'
 import TaskSkeleton from '../components/skeletons/TaskSkeletons'
@@ -27,6 +27,7 @@ export default function DashboardPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
 
+
   const { data: tasks, isLoading } = useTasks()
 
   const createTask = useCreateTask()
@@ -42,7 +43,6 @@ export default function DashboardPage() {
     const attachToken = async () => {
       const token = await getToken({ skipCache: true })
       setAuthToken(token)
-      setTokenReady(true)
       // Force refetch after token is attached
       queryClient.invalidateQueries({ queryKey: ['me'] })
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
