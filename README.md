@@ -187,8 +187,8 @@ The assignee is the person a task has been assigned to by the owner.
 | Edit due date | ✅ | ❌ | ❌ |
 | Delete task | ✅ | ❌ | ❌ |
 | Assign to someone | ✅ | ❌ | ❌ |
-| Start task (TODO → IN_PROGRESS) | ✅ | ✅ | ❌ |
-| Complete task (IN_PROGRESS → DONE) | ✅ | ✅ | ❌ |
+| Start task (TODO → IN_PROGRESS) | ❌ | ✅ | ❌ |
+| Complete task (IN_PROGRESS → DONE) | ❌ | ✅ | ❌ |
 | Reopen task (DONE → TODO) | ✅ | ❌ | ❌ |
 
 ---
